@@ -7,9 +7,10 @@ export type Force = Vec3;
 export type Mass = number;
 export type SpringConstant = number;
 export type Length = number;
+export type Time = number;
 
-const t = 0.0001;
-console.log(t)
+const step = 0.001;
+console.log(step)
 
 class Point {
     r: Position;
@@ -24,10 +25,10 @@ class Point {
 
     addForce(f: Force) {
         let a: Acceleration = f.scale(1/this.m);
-        this.v.Add(a.scale(t));
+        this.v.Add(a.scale(step));
     }
-    updatePosition() {
-        this.r.Add(this.v.scale(t));
+    updatePosition(t: Time) {
+        this.r.Add(this.v.scale(step));
     }
 }
 
@@ -51,5 +52,6 @@ class Spring {
 }
 
 
+export { step };
 export { Point };
 export { Spring };

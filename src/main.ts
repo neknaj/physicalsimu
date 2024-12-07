@@ -1,42 +1,41 @@
 import { Vec3 } from "./vector3.js";
-import { Point,Spring,Mass,SpringConstant,Length } from "./model.js";
+import { Point,Spring,Mass,SpringConstant,Length,Time,step } from "./model.js";
 import { Render2 } from "./render.js";
 
 
 let Points: Point[];
 let Springs: Spring[];
-let render = new Render2(document.querySelector("#output")!,1000,500,[0,0],10);
 
+const mass: Mass = 1;
+const k: SpringConstant = 10000;
+const l: Length = 5;
+const num = 500;
+Points = new Array(num).fill(0).map((x,i)=>new Point(new Vec3(i*10,1,0),mass));
 {
-    const mass: Mass = 1;
-    Points = [
-        new Point(new Vec3(-24,0,0),mass*100000000),
-        new Point(new Vec3(-10,0,0),mass),
-        new Point(new Vec3(0,0,0),mass),
-        new Point(new Vec3(10,0,0),mass),
-        new Point(new Vec3(25,0,0),mass*100000000),
-    ]
-    const k: SpringConstant = 10;
-    const l: Length = 6;
-    Springs = [
-        new Spring(k,l,Points[0],Points[1]),
-        new Spring(k,l,Points[1],Points[2]),
-        new Spring(k,l,Points[2],Points[3]),
-        new Spring(k,l,Points[3],Points[4]),
-    ]
+    Points[0].updatePosition = (t:Time)=>{Points[0].r.y = Math.sin(t*5)*100;};
+    Points[num-1].m = 100000000;
 }
+Springs = new Array(num-1).fill(0).map((x,i)=>new Spring(k,l,Points[i],Points[i+1]));
 
+let render = new Render2(document.querySelector("#output")!,1800,500,[2500,0],0.35);
 
+var speed = 1;
+
+var t: Time = 0;
+var before: Time = Number(new Date());
 function loop() {
-    for (let i=0;i<1000;i++) {
+    var dt: Time = Number(new Date()) - before;
+    before = Number(new Date());
+    for (let i=0;i<dt/1000/step*speed;i++) {
+        t += step;
         for (let spring of Springs) {
             spring.affect();
         }
         for (let point of Points) {
-            point.updatePosition();
+            point.updatePosition(t);
         }
     }
-    render.render(Points,Springs);
+    render.render(t,Points,Springs);
     requestAnimationFrame(loop);
 }
 
