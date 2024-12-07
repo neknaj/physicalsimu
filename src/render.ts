@@ -34,21 +34,24 @@ class Render2 { // 2D Render
             ctx.strokeText(text, 50, 50);
             ctx.fillText(text, 50, 50);
         }
+        const colorscale_s: number = 100/Springs.length;
         for (let i_ in Springs) {
             const i = Number(i_);
             const spring = Springs[i];
-            ctx.strokeStyle = `rgba(${255-i*1/10},${255-i*4/10},${i*3/10},0.5)`;
+            ctx.strokeStyle = `rgba(${255-i*1*colorscale_s},${255-i*4*colorscale_s},${i*3*colorscale_s},0.2)`;
             ctx.beginPath();
             ctx.moveTo((spring.point1.r[0]-this.center[0])*this.scale+this.width/2,(spring.point1.r[1]-this.center[1])*this.scale+this.height/2)
             ctx.lineTo((spring.point2.r[0]-this.center[0])*this.scale+this.width/2,(spring.point2.r[1]-this.center[1])*this.scale+this.height/2)
             ctx.stroke();
         }
+        const colorscale_p: number = 100/Points.length;
         for (let i_ in Points) {
             const i = Number(i_);
             const point = Points[i];
-            ctx.fillStyle = `rgb(${255-i*1/10},${255-i*4/10},${i*3/10})`;
+            const heightcolor = point.r[2]*10;
+            ctx.fillStyle = `rgb(${255-i*1*colorscale_p+heightcolor},${255-i*4*colorscale_p+heightcolor},${i*3*colorscale_p+heightcolor})`;
             ctx.beginPath();
-            ctx.arc((point.r[0]-this.center[0])*this.scale+this.width/2, (point.r[1]-this.center[1])*this.scale+this.height/2, 2, 0, Math.PI*2);
+            ctx.arc((point.r[0]-this.center[0])*this.scale+this.width/2, (point.r[1]-this.center[1])*this.scale+this.height/2, 1.1**point.r[2], 0, Math.PI*2);
             ctx.fill();
         }
     }

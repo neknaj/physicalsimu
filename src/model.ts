@@ -9,7 +9,7 @@ export type SpringConstant = number;
 export type Length = number;
 export type Time = number;
 
-const step = 0.001;
+const step = 0.01;
 console.log(step)
 
 class Point {
