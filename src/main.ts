@@ -1,11 +1,12 @@
 import { Vec3 } from "./vector3.js";
-import { Point,Spring,Mass,SpringConstant,Length,Time,step } from "./model.js";
+import { Point,Spring,Mass,SpringConstant,Length,Time } from "./model.js";
 import { Render2 } from "./render.js";
 
 
 let Points: Point[];
 let Springs: Spring[];
 let render: Render2;
+let step: Time;
 
 function chain() { // 鎖状のモデル
     const mass: Mass = 1;
@@ -15,10 +16,11 @@ function chain() { // 鎖状のモデル
     Points = new Array(num).fill(0).map((x,i)=>new Point(new Vec3(i*10,1,0),mass));
     {
         Points[0].updatePosition = (t:Time)=>{Points[0].r.y = Math.sin(t*5)*100;};
-        Points[num-1].m = 100000000;
+        Points[num-1].m = 10000000000;
     }
     Springs = new Array(num-1).fill(0).map((x,i)=>new Spring(k,l,Points[i],Points[i+1]));
 
+    step = 0.001;
     render = new Render2(document.querySelector("#output")!,1800,700,[2500,0],0.35);
 }
 function net() { // 網状のモデル
@@ -30,12 +32,12 @@ function net() { // 網状のモデル
     Points = new Array(numx*numy).fill(0).map((x,i)=>new Point(new Vec3((i%numx)*10,(i-i%numx)/numx*10,0),mass));
     Points[1+1*numx].updatePosition = (t:Time)=>{Points[1+1*numx].r.z = Math.sin(t*3)*30;};
     for (let y=0;y<numy;y++) {
-        Points[0+y*numy].m = 100000000;
-        Points[(numx-1)+y*numy].m = 100000000;
+        Points[0+y*numy].m = 10000000000;
+        Points[(numx-1)+y*numy].m = 10000000000;
     }
     for (let x=0;x<numx;x++) {
-        Points[x+0*numx].m = 100000000;
-        Points[x+(numy-1)*numx].m = 100000000;
+        Points[x+0*numx].m = 10000000000;
+        Points[x+(numy-1)*numx].m = 10000000000;
     }
     Springs = [];
     for (let x=0;x<numx;x++) {
@@ -49,6 +51,7 @@ function net() { // 網状のモデル
         }
     }
 
+    step = 0.01;
     render = new Render2(document.querySelector("#output")!,900,900,[500,500],0.8);
     // render = new Render2(document.querySelector("#output")!,900,900,[500,500],5);
     // render = new Render2(document.querySelector("#output")!,900,900,[0,0],5);
@@ -57,7 +60,7 @@ function net() { // 網状のモデル
 // chain();
 net();
 
-var speed = 1;
+var speed = 10;
 
 var t: Time = 0;
 var before: Time = Number(new Date());
@@ -67,14 +70,15 @@ function loop() {
     for (let i=0;i<dt/1000/step*speed;i++) {
         t += step;
         for (let spring of Springs) {
-            spring.affect();
+            spring.affect(step);
         }
         for (let point of Points) {
-            point.updatePosition(t);
+            point.updatePosition(t,step);
         }
     }
     render.render(t,Points,Springs);
     requestAnimationFrame(loop);
 }
 
+console.log(step);
 loop();

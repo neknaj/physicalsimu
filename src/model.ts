@@ -9,9 +9,6 @@ export type SpringConstant = number;
 export type Length = number;
 export type Time = number;
 
-const step = 0.01;
-console.log(step)
-
 class Point {
     r: Position;
     v: Velocity;
@@ -23,11 +20,11 @@ class Point {
         this.m = mass;
     }
 
-    addForce(f: Force) {
+    addForce(f: Force,step: Time) {
         let a: Acceleration = f.scale(1/this.m);
         this.v.Add(a.scale(step));
     }
-    updatePosition(t: Time) {
+    updatePosition(t: Time,step: Time) {
         this.r.Add(this.v.scale(step));
     }
 }
@@ -43,15 +40,14 @@ class Spring {
         this.point1 = point1;
         this.point2 = point2;
     }
-    affect() {
+    affect(step: Time) {
         let sub = this.point2.r.subtract(this.point1.r);
         let f1 = sub.normalize().Scale(this.k*Math.abs(sub.length()-this.l));
-        this.point1.addForce(f1);
-        this.point2.addForce(f1.flip());
+        this.point1.addForce(f1,step);
+        this.point2.addForce(f1.flip(),step);
     }
 }
 
 
-export { step };
 export { Point };
 export { Spring };

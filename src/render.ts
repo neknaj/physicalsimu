@@ -1,5 +1,5 @@
 import { Vec3 } from "./vector3.js";
-import { Point,Spring,Mass,SpringConstant,Length,Time,step } from "./model.js";
+import { Point,Spring,Mass,SpringConstant,Length,Time } from "./model.js";
 
 function round(x: number,n: number) {
     return Math.round(x*n)/n;
