@@ -6,7 +6,7 @@ import { Render2 } from "./render.js";
 let Points: Point[];
 let Springs: Spring[];
 let render: Render2;
-let step: Time;
+let step: Time = 0.01;
 
 function chain() { // 鎖状のモデル
     const mass: Mass = 1;
