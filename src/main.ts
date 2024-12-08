@@ -1,5 +1,5 @@
 import { Vec3 } from "./vector3.js";
-import { Point,Spring,Mass,SpringConstant,Length,Time, gravity } from "./model.js";
+import { Point,Spring,Mass,Time, Gravity } from "./model.js";
 import { Render2 } from "./render.js";
 
 
@@ -15,7 +15,7 @@ function circle() { // 環状のモデル
         new Point(new Vec3(100,0,0),mass),
         new Point(new Vec3(0,100,0),mass),
         new Point(new Vec3(0,500,0),mass/100),
-        new Point(new Vec3(500,0,0),mass),
+        new Point(new Vec3(500,0,0),mass*100),
     ]
     {
         Points[1].v[1] = -300;
@@ -32,6 +32,8 @@ function circle() { // 環状のモデル
 
 circle();
 
+let gravity = new Gravity(Points);
+
 var speed = 1;
 
 var t: Time = 0;
@@ -44,12 +46,12 @@ function loop() {
         for (let spring of Springs) {
             spring.affect();
         }
-        gravity(Points);
+        gravity.affect();
         for (let point of Points) {
             point.updatePosition(t,step);
         }
     }
-    render.render(t,Points,Springs);
+    render.render(t,Points,gravity,Springs);
     requestAnimationFrame(loop);
 }
 

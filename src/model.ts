@@ -59,24 +59,39 @@ class Spring {
     }
 }
 
-function gravity(points: Point[]) {
-    const G: number = 6.67*(10**-11);
-    for (let i=0;i<points.length;i++) {
-        let point1: Point = points[i];
-        const F: Force = new Vec3(0,0,0);
-        for (let j=0;j<points.length;j++) {
-            if (i!=j) {
-                const point2: Point = points[j];
-                const r: Vec3 = point2.r.subtract(point1.r);
-                const f = r.normalize().scale(G*(point1.m*point2.m)/(r.length**2));
-                F.Add(f);
+class Gravity {
+    static G: number = 6.6743015*(10**-11);
+    points: Point[];
+    constructor (points: Point[] = []) {
+        this.points = points;
+    }
+    affect() {
+        for (let i=0;i<this.points.length;i++) {
+            let point1: Point = this.points[i];
+            const F: Force = new Vec3(0,0,0);
+            for (let j=0;j<this.points.length;j++) {
+                if (i!=j) {
+                    const point2: Point = this.points[j];
+                    const r: Vec3 = point2.r.subtract(point1.r);
+                    const f = r.normalize().scale(Gravity.G*(point1.m*point2.m)/(r.length**2));
+                    F.Add(f);
+                }
             }
+            point1.addForce(F);
         }
-        point1.addForce(F);
+    }
+    fieldVal(p: Position) {
+        const g_ = new Vec3();
+        for (let i=0;i<this.points.length;i++) {
+            let point: Point = this.points[i];
+            let r = p.subtract(point.r);
+            g_.Add(r.scale(point.m/(r.length**3)));
+        }
+        return g_.Scale(-Gravity.G);
     }
 }
 
 
 export { Point };
 export { Spring };
-export { gravity };
+export { Gravity };

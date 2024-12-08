@@ -1,5 +1,5 @@
 import { Vec3 } from "./vector3.js";
-import { Point,Spring,Mass,SpringConstant,Length,Time } from "./model.js";
+import { Point,Spring,Time, Gravity } from "./model.js";
 
 function round(x: number,n: number) {
     return Math.round(x*n)/n;
@@ -24,7 +24,7 @@ class Render2 { // 2D Render
         canvas.width = width;
         this.beforeRendering = null;
     }
-    render(t:Time,Points: Point[],Springs: Spring[]) {
+    render(t:Time,Points: Point[],gravity: Gravity,Springs: Spring[]) {
         const dt: Time|null = this.beforeRendering?Number(new Date())-this.beforeRendering:null;
         this.beforeRendering = Number(new Date());
         const ctx = this.ctx;
@@ -45,6 +45,24 @@ class Render2 { // 2D Render
                 ctx.fillText(text, this.width-60, 30);
             }
         }
+        { // 重力場
+            ctx.lineWidth = 0.3;
+            // let range = [
+            //     new Vec3(0,0).subtract(this.center).Scale(this.scale).Add(new Vec3(this.width/2,this.height/2,0)).xy,
+            //     new Vec3(0,0).subtract(this.center).Scale(this.scale).Add(new Vec3(this.width/2,this.height/2,0)).xy,
+            // ]
+            for (let j=-1000;j<1000;j+=20) {
+                for (let i=-1000;i<1000;i+=20) {
+                    const p = new Vec3(i,j);
+                    let g = gravity.fieldVal(p);
+                    ctx.strokeStyle = `rgba(${1.02**g.length},${g.length*2},255,${0.001*g.length**2})`;
+                    this.arrow(
+                        p.subtract(this.center).Scale(this.scale).Add(new Vec3(this.width/2,this.height/2,0)).xy,
+                        p.subtract(this.center).Scale(this.scale).Add(new Vec3(this.width/2,this.height/2,0)).add(g.scale(1/g.length).scale(Math.log(1+g.length)*2)).xy
+                    );
+                }
+            }
+        }
         const colorscale_s: number = 100/Springs.length;
         for (let i_ in Springs) {
             const i = Number(i_);
@@ -63,19 +81,21 @@ class Render2 { // 2D Render
             const point = Points[i];
             { // 質点
                 const heightcolor = 50*1.01**point.r[2];
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = `rgb(0,0,0)`;
                 ctx.fillStyle = `rgb(${255-i*1*colorscale_p+heightcolor},${255-i*4*colorscale_p+heightcolor},${i*3*colorscale_p+heightcolor})`;
                 this.circle((point.r.subtract(this.center).Scale(this.scale).Add(new Vec3(this.width/2,this.height/2,0)).xy) , Math.max(Math.min(0+Math.log(1+point.m**10)/20,50),0.1))
             }
             { // 速度
-                ctx.strokeStyle = `rgba(255,0,0,0.5)`;
-                ctx.lineWidth = 2;
+                ctx.strokeStyle = `rgba(255,50,0,0.5)`;
+                ctx.lineWidth = 3;
                 this.arrow(
                     (point.r).subtract(this.center).Scale(this.scale).Add(new Vec3(this.width/2,this.height/2,0)).xy,
                     (point.r.add(point.v.scale(1/(point.v.length+0.0001)).scale(10*Math.log(point.v.length)))).subtract(this.center).Scale(this.scale).Add(new Vec3(this.width/2,this.height/2,0)).xy
                 )
             }
             { // 加速度
-                ctx.strokeStyle = `rgba(0,255,0,0.5)`;
+                ctx.strokeStyle = `rgba(10,255,0,0.5)`;
                 ctx.lineWidth = 3;
                 this.arrow(
                     (point.r).subtract(this.center).Scale(this.scale).Add(new Vec3(this.width/2,this.height/2,0)).xy,
@@ -87,6 +107,7 @@ class Render2 { // 2D Render
     circle(p:[number,number],r:number) {
         this.ctx.beginPath();
         this.ctx.arc( ...p ,r, 0,Math.PI*2);
+        this.ctx.stroke();
         this.ctx.fill();
     }
     path(p1:[number,number],p2:[number,number]) {
