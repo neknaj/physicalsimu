@@ -10,10 +10,10 @@ class Render2 { // 2D Render
     ctx: CanvasRenderingContext2D;
     width: number;
     height: number;
-    center: number[];
+    center: Vec3;
     scale: number;
     beforeRendering: Time|null;
-    constructor(canvas: HTMLCanvasElement,width: number,height: number,center: number[],scale: number) {
+    constructor(canvas: HTMLCanvasElement,width: number,height: number,center: Vec3,scale: number) {
         this.canvas = canvas;
         this.ctx = canvas.getContext("2d")!;
         this.height = height;
@@ -49,24 +49,59 @@ class Render2 { // 2D Render
         for (let i_ in Springs) {
             const i = Number(i_);
             const spring = Springs[i];
-            const forcecolor = 5*1.001**spring.force.length;
+            const forcecolor = 5*1.0001**spring.force.length;
             ctx.lineWidth = Math.max(Math.min(1.001**spring.force.length,0.1),5);
             ctx.strokeStyle = `rgba(${255-i*1*colorscale_s+forcecolor},${255-i*4*colorscale_s+forcecolor},${i*3*colorscale_s+forcecolor},0.2)`;
             ctx.beginPath();
-            ctx.moveTo((spring.point1.r[0]-this.center[0])*this.scale+this.width/2,(spring.point1.r[1]-this.center[1])*this.scale+this.height/2)
-            ctx.lineTo((spring.point2.r[0]-this.center[0])*this.scale+this.width/2,(spring.point2.r[1]-this.center[1])*this.scale+this.height/2)
+            ctx.moveTo( ...(spring.point1.r.subtract(this.center).Scale(this.scale).Add(new Vec3(this.width/2,this.height/2,0)).xy) );
+            ctx.lineTo( ...(spring.point2.r.subtract(this.center).Scale(this.scale).Add(new Vec3(this.width/2,this.height/2,0)).xy) );
             ctx.stroke();
         }
         const colorscale_p: number = 100/Points.length;
         for (let i_ in Points) {
             const i = Number(i_);
             const point = Points[i];
-            const heightcolor = 50*1.01**point.r[2];
-            ctx.fillStyle = `rgb(${255-i*1*colorscale_p+heightcolor},${255-i*4*colorscale_p+heightcolor},${i*3*colorscale_p+heightcolor})`;
-            ctx.beginPath();
-            ctx.arc((point.r[0]-this.center[0])*this.scale+this.width/2, (point.r[1]-this.center[1])*this.scale+this.height/2, Math.max(Math.min(3+point.r[2]*0.01,10),0.1), 0, Math.PI*2);
-            ctx.fill();
+            { // 質点
+                const heightcolor = 50*1.01**point.r[2];
+                ctx.fillStyle = `rgb(${255-i*1*colorscale_p+heightcolor},${255-i*4*colorscale_p+heightcolor},${i*3*colorscale_p+heightcolor})`;
+                this.circle((point.r.subtract(this.center).Scale(this.scale).Add(new Vec3(this.width/2,this.height/2,0)).xy) , Math.max(Math.min(0+Math.log(1+point.m**10)/20,50),0.1))
+            }
+            { // 速度
+                ctx.strokeStyle = `rgba(255,0,0,0.5)`;
+                ctx.lineWidth = 2;
+                this.arrow(
+                    (point.r).subtract(this.center).Scale(this.scale).Add(new Vec3(this.width/2,this.height/2,0)).xy,
+                    (point.r.add(point.v.scale(1/(point.v.length+0.0001)).scale(10*Math.log(point.v.length)))).subtract(this.center).Scale(this.scale).Add(new Vec3(this.width/2,this.height/2,0)).xy
+                )
+            }
+            { // 加速度
+                ctx.strokeStyle = `rgba(0,255,0,0.5)`;
+                ctx.lineWidth = 3;
+                this.arrow(
+                    (point.r).subtract(this.center).Scale(this.scale).Add(new Vec3(this.width/2,this.height/2,0)).xy,
+                    (point.r.add(point.a.scale(1/(point.a.length+0.0001)).scale(10*Math.log(point.a.length)))).subtract(this.center).Scale(this.scale).Add(new Vec3(this.width/2,this.height/2,0)).xy
+                )
+            }
         }
+    }
+    circle(p:[number,number],r:number) {
+        this.ctx.beginPath();
+        this.ctx.arc( ...p ,r, 0,Math.PI*2);
+        this.ctx.fill();
+    }
+    path(p1:[number,number],p2:[number,number]) {
+        this.ctx.beginPath();
+        this.ctx.moveTo( ...p1 );
+        this.ctx.lineTo( ...p2 );
+        this.ctx.stroke();
+    }
+    arrow(p1:[number,number],p2:[number,number]) {
+        this.path(p1,p2);
+        let P1 = Vec3.fromArray(p1);
+        let P2 = Vec3.fromArray(p2);
+        let d = P1.subtract(P2);
+        this.path(p2,P2.add(d.rotate(new Vec3(0,0,1),+0.7).scale(0.5)).xy);
+        this.path(p2,P2.add(d.rotate(new Vec3(0,0,1),-0.7).scale(0.5)).xy);
     }
 }
 

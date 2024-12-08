@@ -12,20 +12,26 @@ export type Time = number;
 class Point {
     r: Position;
     v: Velocity;
+    a: Acceleration;
+    f: Force;
     m: Mass;
 
     constructor(initialPosition: Position,mass: Mass) {
         this.r = initialPosition;
         this.v = new Vec3(0,0,0);
+        this.f = new Vec3(0,0,0);
+        this.a = new Vec3(0,0,0);
         this.m = mass;
     }
 
-    addForce(f: Force,step: Time) {
-        let a: Acceleration = f.scale(1/this.m);
-        this.v.Add(a.scale(step));
+    addForce(f: Force) {
+        this.f.Add(f);
     }
     updatePosition(t: Time,step: Time) {
+        this.a = this.f.scale(1/this.m);
+        this.v.Add(this.a.scale(step));
         this.r.Add(this.v.scale(step));
+        this.f = new Vec3(0,0,0);
     }
 }
 
@@ -40,19 +46,37 @@ class Spring {
         this.point1 = point1;
         this.point2 = point2;
     }
-    affect(step: Time) {
-        let sub = this.point2.r.subtract(this.point1.r);
-        let f1 = sub.normalize().Scale(this.k*Math.abs(sub.length-this.l));
-        this.point1.addForce(f1,step);
-        this.point2.addForce(f1.flip,step);
+    affect() {
+        const sub = this.point2.r.subtract(this.point1.r);
+        const f1 = sub.normalize().Scale(this.k*Math.abs(sub.length-this.l));
+        this.point1.addForce(f1);
+        this.point2.addForce(f1.flip);
     }
     get force(): Force {
-        let sub = this.point2.r.subtract(this.point1.r);
-        let f1 = sub.normalize().Scale(this.k*Math.abs(sub.length-this.l));
+        const sub = this.point2.r.subtract(this.point1.r);
+        const f1 = sub.normalize().Scale(this.k*Math.abs(sub.length-this.l));
         return f1;
+    }
+}
+
+function gravity(points: Point[]) {
+    const G: number = 6.67*(10**-11);
+    for (let i=0;i<points.length;i++) {
+        let point1: Point = points[i];
+        const F: Force = new Vec3(0,0,0);
+        for (let j=0;j<points.length;j++) {
+            if (i!=j) {
+                const point2: Point = points[j];
+                const r: Vec3 = point2.r.subtract(point1.r);
+                const f = r.normalize().scale(G*(point1.m*point2.m)/(r.length**2));
+                F.Add(f);
+            }
+        }
+        point1.addForce(F);
     }
 }
 
 
 export { Point };
 export { Spring };
+export { gravity };
