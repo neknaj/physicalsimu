@@ -15,6 +15,8 @@ class Point {
     a: Acceleration;
     f: Force;
     m: Mass;
+    trajectory: Position[];
+    trajectory_len: number;
 
     constructor(initialPosition: Position,mass: Mass) {
         this.r = initialPosition;
@@ -22,6 +24,8 @@ class Point {
         this.f = new Vec3(0,0,0);
         this.a = new Vec3(0,0,0);
         this.m = mass;
+        this.trajectory =[];
+        this.trajectory_len = 1000;
     }
 
     addForce(f: Force) {
@@ -32,6 +36,12 @@ class Point {
         this.v.Add(this.a.scale(step));
         this.r.Add(this.v.scale(step));
         this.f = new Vec3(0,0,0);
+    }
+    saveTrajectory() {
+        this.trajectory.push(this.r.copy);
+        if (this.trajectory.length>this.trajectory_len) {
+            this.trajectory.shift();
+        }
     }
 }
 

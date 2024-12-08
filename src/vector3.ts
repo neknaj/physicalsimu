@@ -15,6 +15,10 @@ class Vector3 {
         return new Vector3(v[0]|0,v[1]|0,v[2]|0);
     }
 
+    get copy(): Vector3 {
+        return new Vector3(this.x,this.y,this.z);
+    }
+
     // インデックスでのアクセス
     [index: number]: number;
     get [0](): number {
