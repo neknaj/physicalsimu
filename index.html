@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title></title>
+    </head>
+    <body>
+        <canvas id="output"></canvas>
+        <div>
+            <ul>
+                <li><button onclick="changeModel('planet')">Planet</button></li>
+                <li><button onclick="changeModel('wave')">Wave</button></li>
+            </ul>
+        </div>
+    </body>
+</html>
+<script type="module" src="dist/main.js"></script>
+<script>
+function changeModel(name) {
+    sessionStorage.setItem("physicalsimu_model",name);
+    location.reload();
+}
+</script>
+<style>
+    :root {
+        color-scheme: dark;
+    }
+    canvas {
+        /* border: 1px solid white; */
+        background-color: black;
+    }
+</style>
