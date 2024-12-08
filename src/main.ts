@@ -29,7 +29,8 @@ if (modelName=="planet") { // 惑星
             new Point(new Vec3(500,0,0),mass*100),
         ]
         {
-            Points[0].v[1] = -15;
+            Points[0].v[1] = -11.6;
+            Points[0].v[0] = -0.2;
             Points[1].v[1] = -300;
             Points[2].v[0] = 200;
             Points[3].v[0] = 50;
@@ -47,7 +48,7 @@ if (modelName=="planet") { // 惑星
 
     let gravity = new Gravity(Points);
 
-    var speed = 1;
+    var speed = 2;
 
     var t: Time = 0;
     var before: Time = Number(new Date())+1000;

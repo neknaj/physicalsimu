@@ -47,13 +47,13 @@ class Render2 { // 2D Render
             ctx.lineWidth = 3;
             if (dt) {
                 const text: string = `fps: ${round(1000/dt,100)}`;
-                ctx.strokeText(text, 10, 30);
-                ctx.fillText(text, 10, 30);
+                ctx.strokeText(text, 30, 30);
+                ctx.fillText(text, 30, 30);
             }
             {
                 const text: string = `${round(t,100)}s`;
-                ctx.strokeText(text, this.width-60, 30);
-                ctx.fillText(text, this.width-60, 30);
+                ctx.strokeText(text, this.width-100, 30);
+                ctx.fillText(text, this.width-100, 30);
             }
         }
         if (this.config.gravitational_field) { // 重力場
