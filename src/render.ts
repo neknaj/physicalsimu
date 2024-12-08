@@ -5,6 +5,15 @@ function round(x: number,n: number) {
     return Math.round(x*n)/n;
 }
 
+
+
+interface RenderConfig {
+    gravitational_field: boolean;
+    springs: boolean;
+    velocity: boolean;
+    acceleration: boolean;
+    trajectory: boolean;
+}
 class Render2 { // 2D Render
     canvas: HTMLCanvasElement;
     ctx: CanvasRenderingContext2D;
@@ -13,7 +22,8 @@ class Render2 { // 2D Render
     center: Vec3;
     scale: number;
     beforeRendering: Time|null;
-    constructor(canvas: HTMLCanvasElement,width: number,height: number,center: Vec3,scale: number) {
+    config: RenderConfig;
+    constructor(canvas: HTMLCanvasElement,width: number,height: number,center: Vec3,scale: number,config: RenderConfig) {
         this.canvas = canvas;
         this.ctx = canvas.getContext("2d")!;
         this.height = height;
@@ -23,6 +33,7 @@ class Render2 { // 2D Render
         canvas.height = height;
         canvas.width = width;
         this.beforeRendering = null;
+        this.config = config;
     }
     render(t:Time,Points: Point[],gravity: Gravity,Springs: Spring[]) {
         const dt: Time|null = this.beforeRendering?Number(new Date())-this.beforeRendering:null;
@@ -45,12 +56,8 @@ class Render2 { // 2D Render
                 ctx.fillText(text, this.width-60, 30);
             }
         }
-        { // 重力場
+        if (this.config.gravitational_field) { // 重力場
             ctx.lineWidth = 0.3;
-            // let range = [
-            //     new Vec3(0,0).subtract(this.center).Scale(this.scale).Add(new Vec3(this.width/2,this.height/2,0)).xy,
-            //     new Vec3(0,0).subtract(this.center).Scale(this.scale).Add(new Vec3(this.width/2,this.height/2,0)).xy,
-            // ]
             for (let j=-1000;j<1000;j+=50) {
                 for (let i=-1500;i<1500;i+=50) {
                     const p = new Vec3(i,j);
@@ -66,12 +73,11 @@ class Render2 { // 2D Render
             }
         }
         const colorscale_s: number = 100/Springs.length;
-        for (let i_ in Springs) {
+        if (this.config.springs) for (let i_ in Springs) { // バネ
             const i = Number(i_);
             const spring = Springs[i];
-            const forcecolor = 5*1.0001**spring.force.length;
-            ctx.lineWidth = 5;
-            ctx.strokeStyle = `white`;
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = `rgba(${Math.log(1+spring.force.length)*10},255,255,0.5)`;
             ctx.beginPath();
             this.path(
                 (spring.point1.r).subtract(this.center).Scale(this.scale).Add(new Vec3(this.width/2,this.height/2,0)).xy,
@@ -80,16 +86,18 @@ class Render2 { // 2D Render
             ctx.stroke();
         }
         const colorscale_p: number = 100/Points.length;
-        for (let i_ in Points) {
-            const i = Number(i_);
-            const point = Points[i];
-            { // 軌跡
-                for (let j=0;j<point.trajectory.length;j++) {
-                    let lp = point.trajectory[j];
-                    ctx.fillStyle = `rgba(${255-i*1*colorscale_p},${255-i*4*colorscale_p},${i*3*colorscale_p},0.2)`;
-                    this.ctx.beginPath();
-                    this.circle((lp.subtract(this.center).Scale(this.scale).Add(new Vec3(this.width/2,this.height/2,0)).xy) , j/point.trajectory_len*2);
-                    this.ctx.fill();
+        if (this.config.trajectory) { // 軌跡
+            for (let i_ in Points) {
+                const i = Number(i_);
+                const point = Points[i];
+                {
+                    for (let j=0;j<point.trajectory.length;j++) {
+                        let lp = point.trajectory[j];
+                        ctx.fillStyle = `rgba(${255-i*1*colorscale_p},${255-i*4*colorscale_p},${i*3*colorscale_p},0.2)`;
+                        this.ctx.beginPath();
+                        this.circle((lp.subtract(this.center).Scale(this.scale).Add(new Vec3(this.width/2,this.height/2,0)).xy) , j/point.trajectory_len*2);
+                        this.ctx.fill();
+                    }
                 }
             }
         }
@@ -102,7 +110,7 @@ class Render2 { // 2D Render
                 ctx.strokeStyle = `rgb(0,0,0)`;
                 ctx.fillStyle = `rgb(${255-i*1*colorscale_p+heightcolor},${255-i*4*colorscale_p+heightcolor},${i*3*colorscale_p+heightcolor})`;
                 ctx.beginPath();
-                this.circle((point.r.subtract(this.center).Scale(this.scale).Add(new Vec3(this.width/2,this.height/2,0)).xy) , Math.max(Math.min(0+Math.log(1+point.m**10)/20,50),0.1))
+                this.circle((point.r.subtract(this.center).Scale(this.scale).Add(new Vec3(this.width/2,this.height/2,0)).xy) , Math.max(Math.min(0+Math.log(1+point.m**10)/20,50),1))
                 ctx.stroke();
                 ctx.fill();
             }
@@ -110,7 +118,7 @@ class Render2 { // 2D Render
         for (let i_ in Points) {
             const i = Number(i_);
             const point = Points[i];
-            { // 速度
+            if (this.config.velocity) { // 速度
                 ctx.strokeStyle = `rgba(255,50,0,0.5)`;
                 ctx.lineWidth = 3;
                 ctx.beginPath();
@@ -120,7 +128,7 @@ class Render2 { // 2D Render
                 )
                 ctx.stroke();
             }
-            { // 加速度
+            if (this.config.acceleration) { // 加速度
                 ctx.strokeStyle = `rgba(10,255,0,0.5)`;
                 ctx.lineWidth = 3;
                 ctx.beginPath();
@@ -150,3 +158,4 @@ class Render2 { // 2D Render
 }
 
 export { Render2 };
+export { RenderConfig };
