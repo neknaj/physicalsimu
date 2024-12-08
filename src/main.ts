@@ -2,7 +2,10 @@ import { Vec3 } from "./vector3.js";
 import { Point,Spring,Mass,Time, Gravity, Length, SpringConstant } from "./model.js";
 import { Render2, RenderConfig } from "./render.js";
 
-if (true) { // 惑星
+const modelName: string = sessionStorage.getItem("physicalsimu_model")?
+                            sessionStorage.getItem("physicalsimu_model")!:"planet";
+
+if (modelName=="planet") { // 惑星
     let Points: Point[] = [];
     let Springs: Spring[] = [];
     let render: Render2;
@@ -26,7 +29,7 @@ if (true) { // 惑星
             new Point(new Vec3(500,0,0),mass*100),
         ]
         {
-            Points[0].v[1] = -10;
+            Points[0].v[1] = -15;
             Points[1].v[1] = -300;
             Points[2].v[0] = 200;
             Points[3].v[0] = 50;
@@ -36,7 +39,7 @@ if (true) { // 惑星
         // Springs.push(new Spring(k,500,Points[0],Points[4])) // 星をバネで繋ぐ
 
         step = 0.001;
-        render = new Render2(document.querySelector("#output")!,1800,800,new Vec3(0,100,0),0.5,renderconfig);
+        render = new Render2(document.querySelector("#output")!,900,800,new Vec3(0,100,0),0.5,renderconfig);
     }
 
 
@@ -72,7 +75,7 @@ if (true) { // 惑星
     loop();
 }
 
-if (false) { // 平面波
+if (modelName=="wave") { // 平面波
     let Points: Point[] = [];
     let Springs: Spring[] = [];
     let render: Render2;
@@ -115,7 +118,7 @@ if (false) { // 平面波
         }
 
         step = 0.1;
-        render = new Render2(document.querySelector("#output")!,900,900,new Vec3(500,500,0),0.8,renderconfig);
+        render = new Render2(document.querySelector("#output")!,800,800,new Vec3(500,500,0),0.7,renderconfig);
         // render = new Render2(document.querySelector("#output")!,900,900,[500,500],5);
         // render = new Render2(document.querySelector("#output")!,900,900,[0,0],5);
     }
@@ -124,7 +127,7 @@ if (false) { // 平面波
 
     let gravity = new Gravity();
 
-    var speed = 20;
+    var speed = 1;
 
     var t: Time = 0;
     var before: Time = Number(new Date())+1000;
