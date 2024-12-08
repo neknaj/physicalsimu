@@ -53,14 +53,29 @@ function chainl() { // 鎖状のモデル
     step = 0.001;
     render = new Render2(document.querySelector("#output")!,1800,700,[2500,0],0.35);
 }
+function chainc() { // 鎖状のモデル
+    const mass: Mass = 1;
+    const k: SpringConstant = 10000;
+    const l: Length = 5;
+    const num = 500;
+    Points = new Array(num).fill(0).map((x,i)=>new Point(new Vec3(i*10,1,0),mass));
+    {
+        Points[0].updatePosition = (t:Time)=>{Points[0].r.z = Math.cos(t*5)*100;Points[0].r.y = Math.sin(t*5)*100;};
+        Points[num-1].m = 10000000000;
+    }
+    Springs = new Array(num-1).fill(0).map((x,i)=>new Spring(k,l,Points[i],Points[i+1]));
+
+    step = 0.001;
+    render = new Render2(document.querySelector("#output")!,1800,700,[2500,0],0.35);
+}
 function net() { // 網状のモデル
     const mass: Mass = 1;
-    const k: SpringConstant = 50;
-    const l: Length = 5;
-    const numx = 50;
-    const numy = 50;
+    const k: SpringConstant = 5;
+    const l: Length = 0;
+    const numx = 100;
+    const numy = 100;
     Points = new Array(numx*numy).fill(0).map((x,i)=>new Point(new Vec3((i%numx)*10,(i-i%numx)/numx*10,0),mass));
-    Points[1+1*numx].updatePosition = (t:Time)=>{Points[1+1*numx].r.z = Math.sin(t*3)*30;};
+    Points[1+1*numx].updatePosition = (t:Time)=>{Points[1+1*numx].r.z = Math.sin(t*2)*500;};
     for (let y=0;y<numy;y++) {
         Points[0+y*numy].m = 10000000000;
         Points[(numx-1)+y*numy].m = 10000000000;
@@ -81,8 +96,8 @@ function net() { // 網状のモデル
         }
     }
 
-    step = 0.001;
-    render = new Render2(document.querySelector("#output")!,900,900,[250,250],1.5);
+    step = 0.01;
+    render = new Render2(document.querySelector("#output")!,900,900,[500,500],0.8);
     // render = new Render2(document.querySelector("#output")!,900,900,[500,500],5);
     // render = new Render2(document.querySelector("#output")!,900,900,[0,0],5);
 }
@@ -90,12 +105,13 @@ function net() { // 網状のモデル
 // circle();
 // chainv();
 // chainl();
+// chainc();
 net();
 
 var speed = 1;
 
 var t: Time = 0;
-var before: Time = Number(new Date());
+var before: Time = Number(new Date())+1000;
 function loop() {
     var dt: Time = Number(new Date()) - before;
     before = Number(new Date());

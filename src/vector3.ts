@@ -66,10 +66,10 @@ class Vector3 {
     }
 
     // ベクトルの反転
-    flip(): Vector3 {
+    get flip(): Vector3 {
         return new Vector3(-this.x,-this.y,-this.z);
     }
-    Flip(other: Vector3): this {
+    Flip(): this {
         this.x *= -1;
         this.y *= -1;
         this.z *= -1;
@@ -103,20 +103,20 @@ class Vector3 {
     }
 
     // ベクトルの長さ
-    length(): number {
-      return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
+    get length(): number {
+        return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
     }
 
     // 正規化（単位ベクトル）
     normalize(): Vector3 {
-        const len = this.length();
+        const len = this.length;
         if (len === 0) {
             throw new Error("Cannot normalize a zero-length vector.");
         }
         return this.scale(1 / len);
     }
     Normalize(): this {
-        const len = this.length();
+        const len = this.length;
         if (len === 0) {
             throw new Error("Cannot normalize a zero-length vector.");
         }

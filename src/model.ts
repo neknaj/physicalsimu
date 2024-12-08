@@ -42,9 +42,14 @@ class Spring {
     }
     affect(step: Time) {
         let sub = this.point2.r.subtract(this.point1.r);
-        let f1 = sub.normalize().Scale(this.k*Math.abs(sub.length()-this.l));
+        let f1 = sub.normalize().Scale(this.k*Math.abs(sub.length-this.l));
         this.point1.addForce(f1,step);
-        this.point2.addForce(f1.flip(),step);
+        this.point2.addForce(f1.flip,step);
+    }
+    get force(): Force {
+        let sub = this.point2.r.subtract(this.point1.r);
+        let f1 = sub.normalize().Scale(this.k*Math.abs(sub.length-this.l));
+        return f1;
     }
 }
 
